@@ -1,0 +1,194 @@
+<?php
+include ("conexao.php");
+
+if (isset($_POST['atualizar'])) {
+    $id = $_POST['id'];
+    $nome = $_POST['nome'];
+    $cpf = $_POST['cpf'];
+    $telefone = $_POST['telefone'];
+
+    $sql = "UPDATE alunos SET 
+               nome = '$nome',
+               cpf = '$cpf',
+               telefone = '$telefone'
+            WHERE id = '$id'";
+
+    if ($conn->query($sql) === TRUE) {
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        echo "Erro ao atualizar: " . $conn->error;
+    }
+}
+
+
+$id = '';
+$nome = '';
+$cpf ='';
+$telefone ='';
+
+
+if (isset($_GET["editar"])) {
+    $id = $_GET["editar"];
+
+    $sql = "SELECT * FROM alunos WHERE id = $id";
+    $resultadoeditar = $conn->query($sql);
+
+    if ($resultadoeditar && $resultadoeditar->num_rows > 0) {
+        $linha = $resultadoeditar->fetch_assoc();
+       $id = $linha['id'];
+       $nome = $linha['nome'];
+       $cpf = $linha['cpf'];
+       $telefone = $linha ['telefone'];
+    }
+}
+if (isset($_GET["excluir"])) {
+    $id = (int)$_GET["excluir"];
+
+    if ($id > 0) {
+
+        $sql = "DELETE FROM alunos WHERE id = $id";
+
+        if ($conn->query($sql) === TRUE) {
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        } else {
+            echo "Erro ao excluir " . $conn->error;
+        }
+    }
+}
+
+
+$sql = "SELECT * FROM alunos";
+$resultado = $conn->query($sql);
+?>
+
+
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Alunos</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+<div class="max-w-6xl mx-auto py-8 px-4">
+
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Gerenciar Alunos</h1>
+
+        <a href="dashboard.php"
+           class="bg-gray-700 text-white px-4 py-2 rounded hover:bg-gray-800">
+            Voltar
+        </a>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4">Editar Aluno</h2>
+
+        <form method="POST">
+
+            <input type="hidden" name="id" value="<?php echo $id; ?>">
+
+            <div class="mb-4">
+                <label class="block mb-2 font-medium">Nome</label>
+                <input
+                    type="text"
+                    name="nome"
+                    value="<?php echo $nome; ?>"
+                    class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+            </div>
+
+            <div class="mb-4">
+                <label class="block mb-2 font-medium">CPF</label>
+                <input
+                    type="text"
+                    name="cpf"
+                    value="<?php echo $cpf; ?>"
+                    class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+            </div>
+
+            <div class="mb-4">
+                <label class="block mb-2 font-medium">Telefone</label>
+                <input
+                    type="text"
+                    name="telefone"
+                    value="<?php echo $telefone; ?>"
+                    class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+            </div>
+
+            <button
+                type="submit"
+                name="atualizar"
+                class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700">
+                Atualizar
+            </button>
+
+        </form>
+    </div>
+
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+
+        <table class="min-w-full">
+
+            <thead class="bg-blue-600 text-white">
+                <tr>
+                    <th class="px-4 py-3 text-left">ID</th>
+                    <th class="px-4 py-3 text-left">Nome</th>
+                    <th class="px-4 py-3 text-left">CPF</th>
+                    <th class="px-4 py-3 text-left">Telefone</th>
+                    <th class="px-4 py-3 text-center">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                <?php while($linha = $resultado->fetch_assoc()) { ?>
+
+                <tr class="border-b hover:bg-gray-100">
+
+                    <td class="px-4 py-3"><?php echo $linha['id']; ?></td>
+
+                    <td class="px-4 py-3"><?php echo $linha['nome']; ?></td>
+
+                    <td class="px-4 py-3"><?php echo $linha['cpf']; ?></td>
+
+                    <td class="px-4 py-3"><?php echo $linha['telefone']; ?></td>
+
+                    <td class="px-4 py-3 text-center space-x-2">
+
+                        <a href="?editar=<?php echo $linha['id']; ?>"
+                           class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
+                            Editar
+                        </a>
+
+                        <a href="?excluir=<?php echo $linha['id']; ?>"
+                           onclick="return confirm('Deseja realmente excluir este aluno?')"
+                           class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+                            Excluir
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                <?php } ?>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+</html>
